@@ -7,8 +7,19 @@ require("dotenv").config();
 const port = process.env.PORT || 8080;
 const app = express();
 
+const corsOptions = {
+  origin: [
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "https://arnabsahawrk-dine-portal.web.app",
+    "https://arnabsahawrk-dine-portal.firebaseapp.com",
+  ],
+  credentials: true,
+  optionsSuccessStatus: 200,
+};
+
 //middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 
 //Database Authenticate
