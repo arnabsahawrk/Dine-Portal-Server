@@ -1,5 +1,7 @@
 const express = require("express");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
 const { MongoClient, ServerApiVersion } = require("mongodb");
 
 //config
@@ -21,9 +23,16 @@ const corsOptions = {
 //middleware
 app.use(cors(corsOptions));
 app.use(express.json());
+app.use(cookieParser());
 
 //Database Authenticate
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.2p5zaxk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+
+const cookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+};
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -37,6 +46,25 @@ const client = new MongoClient(uri, {
 //Send and Get data from sever to database
 async function run() {
   try {
+    //JWT api
+    app.post("/jwt", (req, res) => {
+      const user = req.body;
+
+      //Generate The Token
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "2d",
+      });
+
+      //Sending The Cookie
+      res.cookie("token", token, cookieOptions).send({ success: true });
+    });
+
+    //Clear cookie api
+    app.post("/logout", (req, res) => {
+      res
+        .clearCookie("token", { ...cookieOptions, maxAge: 0 })
+        .send({ success: true });
+    });
   } catch (err) {
     console.log("Error from database:", err);
   }
