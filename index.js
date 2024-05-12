@@ -54,8 +54,8 @@ async function run() {
     //Insert Food api
     app.post("/foods", async (req, res) => {
       const food = req.body;
-      const result = await allFoods.insertOne(food);
-      res.send(result);
+      const insertedFood = await allFoods.insertOne(food);
+      res.send(insertedFood);
     });
 
     //Get Top Foods api
@@ -64,13 +64,20 @@ async function run() {
       const limit = parseFloat(req.query.limit);
       const options = { sort: { sold: 1 } };
 
-      const result = await allFoods
+      const getTopFoods = await allFoods
         .find({}, options)
         .skip(skip)
         .limit(limit)
         .toArray();
 
-      res.send(result);
+      res.send(getTopFoods);
+    });
+
+    //Get All Foods api
+    app.get("/allFoods", async (req, res) => {
+      const getAllFoods = await allFoods.find({}).toArray();
+
+      res.send(getAllFoods);
     });
 
     //JWT api
