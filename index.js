@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 //config
 require("dotenv").config();
@@ -78,6 +78,16 @@ async function run() {
       const getAllFoods = await allFoods.find({}).toArray();
 
       res.send(getAllFoods);
+    });
+
+    //Get Single Food api
+    app.get("/allFoods/:id", async (req, res) => {
+      const { id } = req.params;
+      const query = { _id: new ObjectId(id) };
+
+      const getSingleFood = await allFoods.findOne(query);
+
+      res.send(getSingleFood);
     });
 
     //JWT api
