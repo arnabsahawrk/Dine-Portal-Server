@@ -58,6 +58,21 @@ async function run() {
       res.send(result);
     });
 
+    //Get Top Foods api
+    app.get("/topFoods", async (req, res) => {
+      const skip = parseFloat(req.query.skip);
+      const limit = parseFloat(req.query.limit);
+      const options = { sort: { sold: 1 } };
+
+      const result = await allFoods
+        .find({}, options)
+        .skip(skip)
+        .limit(limit)
+        .toArray();
+
+      res.send(result);
+    });
+
     //JWT api
     app.post("/jwt", (req, res) => {
       const user = req.body;
