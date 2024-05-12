@@ -46,6 +46,18 @@ const client = new MongoClient(uri, {
 //Send and Get data from sever to database
 async function run() {
   try {
+    //Database
+    const dinePortalDB = client.db("dine-portal");
+    //All Collections
+    const allFoods = dinePortalDB.collection("all-foods");
+
+    //Insert Food api
+    app.post("/foods", async (req, res) => {
+      const food = req.body;
+      const result = await allFoods.insertOne(food);
+      res.send(result);
+    });
+
     //JWT api
     app.post("/jwt", (req, res) => {
       const user = req.body;
