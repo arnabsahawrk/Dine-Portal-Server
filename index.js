@@ -137,6 +137,40 @@ async function run() {
       res.send(updateResult);
     });
 
+    //Get ordered Foods api
+    app.get("/orderedFoods/:email", async (req, res) => {
+      const { email } = req.params;
+      const getOrderedFoods = await allOrders
+        .find({
+          BuyerEmail: email,
+        })
+        .toArray();
+
+      res.send(getOrderedFoods);
+    });
+
+    //Delete ordered foods api
+    app.delete("/orders/:id", async (req, res) => {
+      const { id } = req.params;
+      const query = { _id: new ObjectId(id) };
+
+      const cancelOrder = await allOrders.deleteOne(query);
+      res.send(cancelOrder);
+    });
+
+    //Increment Quantity and Decrement Sold
+    app.patch("/cancelOrder", async (req, res) => {
+      const { foodId, buyerQuantity } = req.body;
+      const query = { _id: new ObjectId(foodId) };
+      const updateDoc = {
+        $inc: { quantity: buyerQuantity, sold: -buyerQuantity },
+      };
+
+      const result = await allFoods.updateOne(query, updateDoc);
+
+      res.send(result);
+    });
+
     //JWT api
     app.post("/jwt", (req, res) => {
       const user = req.body;
