@@ -113,6 +113,18 @@ async function run() {
       res.send(result);
     });
 
+    //Get Added Foods api
+    app.get("/addedFoods/:email", async (req, res) => {
+      const { email } = req.params;
+      const getAddedFoods = await allFoods
+        .find({
+          userEmail: email,
+        })
+        .toArray();
+
+      res.send(getAddedFoods);
+    });
+
     //JWT api
     app.post("/jwt", (req, res) => {
       const user = req.body;
