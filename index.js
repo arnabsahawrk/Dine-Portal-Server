@@ -51,6 +51,7 @@ async function run() {
     //All Collections
     const allFoods = dinePortalDB.collection("all-foods");
     const allOrders = dinePortalDB.collection("all-orders");
+    const allFeedbacks = dinePortalDB.collection("all-feedbacks");
 
     //Insert Food api
     app.post("/foods", async (req, res) => {
@@ -169,6 +170,33 @@ async function run() {
       const result = await allFoods.updateOne(query, updateDoc);
 
       res.send(result);
+    });
+
+    //fooName Search api
+    app.get("/foods/search", async (req, res) => {
+      const query = req.query.s;
+      const regex = new RegExp(query, "i");
+
+      const searchResult = await allFoods
+        .find({ foodName: { $regex: regex } })
+        .toArray();
+
+      res.send(searchResult);
+    });
+
+    //Feedback Post
+    app.post("/feedback", async (req, res) => {
+      const feedback = req.body;
+      const insertedFeedback = await allFeedbacks.insertOne(feedback);
+
+      res.send(insertedFeedback);
+    });
+
+    //Bring All Feedbacks Data
+    app.get("/feedback", async (req, res) => {
+      const getAllFeedbacks = await allFeedbacks.find({}).toArray();
+
+      res.send(getAllFeedbacks);
     });
 
     //JWT api
