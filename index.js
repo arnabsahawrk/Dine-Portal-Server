@@ -50,6 +50,7 @@ async function run() {
     const dinePortalDB = client.db("dine-portal");
     //All Collections
     const allFoods = dinePortalDB.collection("all-foods");
+    const allOrders = dinePortalDB.collection("all-orders");
 
     //Insert Food api
     app.post("/foods", async (req, res) => {
@@ -62,7 +63,7 @@ async function run() {
     app.get("/topFoods", async (req, res) => {
       const skip = parseFloat(req.query.skip);
       const limit = parseFloat(req.query.limit);
-      const options = { sort: { sold: 1 } };
+      const options = { sort: { sold: -1 } };
 
       const getTopFoods = await allFoods
         .find({}, options)
@@ -88,6 +89,28 @@ async function run() {
       const getSingleFood = await allFoods.findOne(query);
 
       res.send(getSingleFood);
+    });
+
+    //Insert Order api
+    app.post("/orders", async (req, res) => {
+      const order = req.body;
+
+      const insertedOrder = await allOrders.insertOne(order);
+
+      res.send(insertedOrder);
+    });
+
+    //Increment Sold and Decrement Quantity
+    app.patch("/foodSold", async (req, res) => {
+      const { foodId, buyerQuantity } = req.body;
+      const query = { _id: new ObjectId(foodId) };
+      const updateDoc = {
+        $inc: { quantity: -buyerQuantity, sold: buyerQuantity },
+      };
+
+      const result = await allFoods.updateOne(query, updateDoc);
+
+      res.send(result);
     });
 
     //JWT api
