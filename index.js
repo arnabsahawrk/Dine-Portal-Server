@@ -125,6 +125,18 @@ async function run() {
       res.send(getAddedFoods);
     });
 
+    //Update added foods api
+    app.patch("/addedFoods/:id", async (req, res) => {
+      const { id } = req.params;
+      const formData = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = { $set: { ...formData } };
+
+      const updateResult = await allFoods.updateOne(filter, updateDoc);
+
+      res.send(updateResult);
+    });
+
     //JWT api
     app.post("/jwt", (req, res) => {
       const user = req.body;
