@@ -53,8 +53,26 @@ async function run() {
     const allOrders = dinePortalDB.collection("all-orders");
     const allFeedbacks = dinePortalDB.collection("all-feedbacks");
 
+    //Verify token
+    const verifyToken = (req, res, next) => {
+      const token = req?.cookies?.token;
+      if (!token) {
+        return res.status(401).send({ message: "unauthorized access" });
+      }
+      jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+        if (err) {
+          return res.status(401).send({ message: "unauthorized access" });
+        }
+        req.user = decoded;
+        next();
+      });
+    };
+
     //Insert Food api
-    app.post("/foods", async (req, res) => {
+    app.post("/foods", verifyToken, async (req, res) => {
+      if (req.user.email !== req.query.email) {
+        return res.status(403).status({ message: "forbidden access" });
+      }
       const food = req.body;
       const insertedFood = await allFoods.insertOne(food);
       res.send(insertedFood);
@@ -93,7 +111,10 @@ async function run() {
     });
 
     //Insert Order api
-    app.post("/orders", async (req, res) => {
+    app.post("/orders", verifyToken, async (req, res) => {
+      if (req.user.email !== req.query.email) {
+        return res.status(403).status({ message: "forbidden access" });
+      }
       const order = req.body;
 
       const insertedOrder = await allOrders.insertOne(order);
@@ -102,7 +123,10 @@ async function run() {
     });
 
     //Increment Sold and Decrement Quantity
-    app.patch("/foodSold", async (req, res) => {
+    app.patch("/foodSold", verifyToken, async (req, res) => {
+      if (req.user.email !== req.query.email) {
+        return res.status(403).status({ message: "forbidden access" });
+      }
       const { foodId, buyerQuantity } = req.body;
       const query = { _id: new ObjectId(foodId) };
       const updateDoc = {
@@ -115,7 +139,10 @@ async function run() {
     });
 
     //Get Added Foods api
-    app.get("/addedFoods/:email", async (req, res) => {
+    app.get("/addedFoods/:email", verifyToken, async (req, res) => {
+      if (req.user.email !== req.query.email) {
+        return res.status(403).status({ message: "forbidden access" });
+      }
       const { email } = req.params;
       const getAddedFoods = await allFoods
         .find({
@@ -127,7 +154,10 @@ async function run() {
     });
 
     //Update added foods api
-    app.patch("/addedFoods/:id", async (req, res) => {
+    app.patch("/addedFoods/:id", verifyToken, async (req, res) => {
+      if (req.user.email !== req.query.email) {
+        return res.status(403).status({ message: "forbidden access" });
+      }
       const { id } = req.params;
       const formData = req.body;
       const filter = { _id: new ObjectId(id) };
@@ -139,7 +169,10 @@ async function run() {
     });
 
     //Get ordered Foods api
-    app.get("/orderedFoods/:email", async (req, res) => {
+    app.get("/orderedFoods/:email", verifyToken, async (req, res) => {
+      if (req.user.email !== req.query.email) {
+        return res.status(403).status({ message: "forbidden access" });
+      }
       const { email } = req.params;
       const getOrderedFoods = await allOrders
         .find({
@@ -151,7 +184,10 @@ async function run() {
     });
 
     //Delete ordered foods api
-    app.delete("/orders/:id", async (req, res) => {
+    app.delete("/orders/:id", verifyToken, async (req, res) => {
+      if (req.user.email !== req.query.email) {
+        return res.status(403).status({ message: "forbidden access" });
+      }
       const { id } = req.params;
       const query = { _id: new ObjectId(id) };
 
@@ -185,7 +221,10 @@ async function run() {
     });
 
     //Feedback Post
-    app.post("/feedback", async (req, res) => {
+    app.post("/feedback", verifyToken, async (req, res) => {
+      if (req.user.email !== req.query.email) {
+        return res.status(403).status({ message: "forbidden access" });
+      }
       const feedback = req.body;
       const insertedFeedback = await allFeedbacks.insertOne(feedback);
 
