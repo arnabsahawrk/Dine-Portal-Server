@@ -219,9 +219,22 @@ async function run() {
 
     //Bring All Feedbacks Data
     app.get("/feedback", async (req, res) => {
-      const getAllFeedbacks = await allFeedbacks.find({}).toArray();
+      const skip = parseFloat(req.query.skip);
+      const limit = parseFloat(req.query.limit);
+      const getAllFeedbacks = await allFeedbacks
+        .find({})
+        .skip(skip * limit)
+        .limit(limit)
+        .toArray();
 
       res.send(getAllFeedbacks);
+    });
+
+    //Get Total Feedback Count
+    app.get("/feedback/count", async (req, res) => {
+      const feedbackCount = await allFeedbacks.estimatedDocumentCount();
+
+      res.send({ count: feedbackCount });
     });
 
     //JWT api
