@@ -237,6 +237,25 @@ async function run() {
       res.send({ count: feedbackCount });
     });
 
+    //Get Filter Result
+    app.get("/foods/filter", async (req, res) => {
+      const filterValue = req.query.f;
+      let filterResult;
+      switch (filterValue) {
+        case "low":
+          filterResult = await allFoods.find({}).sort({ price: 1 }).toArray();
+          break;
+        case "high":
+          filterResult = await allFoods.find({}).sort({ price: -1 }).toArray();
+          break;
+        case "sold":
+          filterResult = await allFoods.find({}).sort({ sold: -1 }).toArray();
+          break;
+      }
+
+      res.send(filterResult);
+    });
+
     //JWT api
     app.post("/jwt", (req, res) => {
       const user = req.body;
