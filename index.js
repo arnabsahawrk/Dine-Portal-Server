@@ -251,6 +251,11 @@ async function run() {
         case "sold":
           filterResult = await allFoods.find({}).sort({ sold: -1 }).toArray();
           break;
+        default:
+          filterResult = await allFoods
+            .find({ foodCategory: filterValue })
+            .toArray();
+          break;
       }
 
       res.send(filterResult);
