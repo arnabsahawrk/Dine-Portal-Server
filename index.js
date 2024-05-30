@@ -6,6 +6,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 //config
 require("dotenv").config();
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const port = process.env.PORT || 8080;
 const app = express();
 
@@ -67,6 +68,7 @@ async function run() {
     const allFoods = dinePortalDB.collection("all-foods");
     const allOrders = dinePortalDB.collection("all-orders");
     const allFeedbacks = dinePortalDB.collection("all-feedbacks");
+    const paymentCollection = dinePortalDB.collection("all-payments");
 
     //Insert Food api
     app.post("/foods", verifyToken, async (req, res) => {
@@ -259,6 +261,35 @@ async function run() {
       }
 
       res.send(filterResult);
+    });
+
+    //Payment Related Api
+    //create payment intent
+    app.post("/create-payment-intent", verifyToken, async (req, res) => {
+      const priceInCent = parseFloat(req.body.price) * 100;
+
+      if (parseFloat < 1) return;
+
+      //generate client secret
+      const { client_secret } = await await stripe.paymentIntents.create({
+        amount: priceInCent,
+        currency: "inr",
+
+        automatic_payment_methods: {
+          enabled: true,
+        },
+      });
+
+      res.send({ clientSecret: client_secret });
+    });
+
+    //save payment history
+    app.post("/payments", verifyToken, async (req, res) => {
+      const payment = req.body;
+
+      const insertedPayment = await paymentCollection.insertOne(payment);
+
+      res.send(insertedPayment);
     });
 
     //JWT api
